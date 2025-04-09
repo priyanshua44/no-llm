@@ -25,6 +25,9 @@ uv pip install "no_llm[pydantic-ai]"
 
 ## Quick Example with Pydantic AI
 
+!!! tip "Free Testing"
+    Get a free API key from [OpenRouter](https://openrouter.ai/keys) to test various models without individual provider accounts.
+
 ```python
 import os
 
@@ -75,9 +78,6 @@ print(result.data)
 * __Model Registry__: Central management of models with capability-based filtering
 
 * __Integration Ready__: Works with Pydantic AI, and more frameworks coming soon
-
-!!! tip "Free Testing"
-    Get a free API key from [OpenRouter](https://openrouter.ai/keys) to test various models without individual provider accounts.
 
 ## Next Steps
 
