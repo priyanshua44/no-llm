@@ -33,7 +33,8 @@ jobs:
       - name: Run Tests
         run: hatch run test:test-cov
 
-  docs:
+  build_mkdocs:
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -53,15 +54,33 @@ jobs:
       - name: Build docs
         run: hatch run docs:mkdocs build
 
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Push to github-pages
+        run: hatch run docs:deploy
+
+  deploy_mkdocs:
+    needs: build_mkdocs
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
+          ref: gh-pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   publish:
-    needs: [test, docs]
+    needs: [test, deploy_mkdocs]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:

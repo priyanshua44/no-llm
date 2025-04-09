@@ -119,6 +119,7 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 serve = "mkdocs serve"
 build = "mkdocs build"
+deploy = "mkdocs gh-deploy --config-file mkdocs.yml --force"
 
 [tool.hatch.envs.test]
 dependencies = [
