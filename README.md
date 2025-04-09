@@ -30,7 +30,12 @@ import os
 
 from no_llm.integrations.pydantic_ai import NoLLMModel
 from no_llm.registry import ModelRegistry
+from no_llm.settings import ValidationMode, settings
 from pydantic_ai import Agent
+from pydantic_ai.settings import ModelSettings
+
+settings.validation_mode = ValidationMode.ERROR
+# or ValidationMode.WARN, ValidationMode.CLAMP
 
 os.environ["OPENROUTER_API_KEY"] = "..."
 
@@ -42,9 +47,19 @@ print([m.identity.id for m in openrouter_models])
 no_llm_model = NoLLMModel(*openrouter_models)
 
 # Use with Pydantic AI
-agent = Agent(no_llm_model)
+agent = Agent(no_llm_model, model_settings=ModelSettings(temperature=1.2))
 result = agent.run_sync("What is the capital of France?")
 print(result.data)
+# > 2025-04-09 09:50:51.375 | WARNING  | no_llm.integrations.pydantic_ai:request:220 - Model deepseek-chat failed, trying next fallback. Error: Invalid value for parameter 'temperature'
+# > Current value: 1.2
+# > Valid range: (0.0, 1.0)
+# > Error: Value 1.2 outside range [0.0, 1.0]
+# > 2025-04-09 09:50:51.375 | WARNING  | no_llm.integrations.pydantic_ai:request:220 - Model deepseek-r1-llama-70b-distilled failed, trying next fallback. Error: Invalid value for parameter 'temperature'
+# > Current value: 1.2
+# > Valid range: (0.0, 1.0)
+# > Error: Value 1.2 outside range [0.0, 1.0]
+# ✅ gemini-2.0-flash
+# > The capital of France is **Paris**.
 ```
 
 ## Why no/llm?
