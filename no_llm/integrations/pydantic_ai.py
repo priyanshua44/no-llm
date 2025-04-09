@@ -4,8 +4,6 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, cast
 
-from typing_extensions import assert_never
-
 try:
     from anthropic import AsyncAnthropicVertex
     from mistralai_gcp import MistralGoogleCloud
@@ -15,7 +13,6 @@ try:
         StreamedResponse,
     )
     from pydantic_ai.models.anthropic import AnthropicModel
-    from pydantic_ai.models.fallback import FallbackModel
     from pydantic_ai.models.gemini import GeminiModel
     from pydantic_ai.models.groq import GroqModel
     from pydantic_ai.models.mistral import MistralModel
@@ -75,15 +72,18 @@ class NoLLMModel(Model):
     """
 
     _pydantic_model: Model | None = field(default=None, repr=False)
+    _current_model_config: ModelConfiguration | None = field(default=None, repr=False)
 
     def __init__(
         self,
         default_model: ModelConfiguration,
         *fallback_models: ModelConfiguration,
     ):
-        self.models = [default_model, *fallback_models]
         self._pydantic_model = None
-        self._get_pydantic_model()
+        self._current_model_config = None
+        self.models: list[tuple[Model, ModelConfiguration]] = self._get_pydantic_models(
+            [default_model, *fallback_models]
+        )
 
     @property
     def model_name(self) -> str:
@@ -91,24 +91,18 @@ class NoLLMModel(Model):
         return "no_llm"
 
     @property
-    def model_config(self) -> ModelConfiguration:
-        return self.models[0]
-
-    @property
     def system(self) -> str | None:  # type: ignore
         """The system / model provider, ex: openai."""
         return "no_llm"
 
-    def _get_pydantic_model(
+    def _get_pydantic_models(
         self,
-    ) -> Model:
+        model_cfgs: list[ModelConfiguration],
+    ) -> list[tuple[Model, ModelConfiguration]]:
         """Get the appropriate pydantic-ai model based on no_llm configuration."""
-        if self._pydantic_model is not None:
-            return self._pydantic_model
+        models: list[tuple[Model, ModelConfiguration]] = []
 
-        models: list[Model] = []
-
-        for model_cfg in self.models:
+        for model_cfg in model_cfgs:
             if model_cfg.integration_aliases is None:
                 msg = "Model must have integration aliases. It is required for pydantic-ai integration."
                 raise TypeError(msg)
@@ -118,65 +112,63 @@ class NoLLMModel(Model):
             if model_cfg.mode != ModelMode.CHAT:
                 msg = f"Model {model_cfg.identity.id} must be a chat model"
                 raise TypeError(msg)
-            # Try to build a model for each provider variant
+            pyd_model: Model | None = None
             for provider in model_cfg.iter():
                 try:
                     if isinstance(provider, VertexProvider):
                         if "mistral" in model_cfg.identity.id:
                             pydantic_mistral_gcp_patch()
-                            models.append(
-                                MistralModel(
-                                    model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                    provider=PydanticMistralProvider(
-                                        mistral_client=MistralGoogleCloud(  # type: ignore
-                                            project_id=provider.project_id, region=provider.current
-                                        ),
-                                    ),
-                                )
-                            )
-                        elif "claude" in model_cfg.identity.id:
-                            models.append(
-                                AnthropicModel(
-                                    model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                    provider=PydanticAnthropicProvider(
-                                        anthropic_client=AsyncAnthropicVertex(  # type: ignore
-                                            project_id=provider.project_id, region=provider.current
-                                        ),
-                                    ),
-                                )
-                            )
-                        elif "gemini" in model_cfg.identity.id:
-                            models.append(
-                                GeminiModel(
-                                    model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                    provider=PydanticVertexProvider(
-                                        region=cast(VertexAiRegion, provider.current),
-                                        project_id=provider.project_id,
-                                    ),
-                                )
-                            )
-                    elif isinstance(provider, AnthropicProvider):
-                        models.append(
-                            AnthropicModel(
+                            pyd_model = MistralModel(
                                 model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                provider=PydanticAnthropicProvider(
-                                    api_key=provider.api_key,
+                                provider=PydanticMistralProvider(
+                                    mistral_client=MistralGoogleCloud(  # type: ignore
+                                        project_id=provider.project_id, region=provider.current
+                                    ),
                                 ),
                             )
+                        elif "claude" in model_cfg.identity.id:
+                            pyd_model = AnthropicModel(
+                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                provider=PydanticAnthropicProvider(
+                                    anthropic_client=AsyncAnthropicVertex(  # type: ignore
+                                        project_id=provider.project_id, region=provider.current
+                                    ),
+                                ),
+                            )
+                        elif "gemini" in model_cfg.identity.id:
+                            pyd_model = GeminiModel(
+                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                provider=PydanticVertexProvider(
+                                    region=cast(VertexAiRegion, provider.current),
+                                    project_id=provider.project_id,
+                                ),
+                            )
+                    elif isinstance(provider, AnthropicProvider):
+                        pyd_model = AnthropicModel(
+                            model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                            provider=PydanticAnthropicProvider(
+                                api_key=provider.api_key,
+                            ),
                         )
                     elif isinstance(provider, MistralProvider):
-                        models.append(
-                            MistralModel(
-                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                provider=PydanticMistralProvider(api_key=provider.api_key),
-                            )
+                        pyd_model = MistralModel(
+                            model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                            provider=PydanticMistralProvider(api_key=provider.api_key),
                         )
                     elif isinstance(provider, GroqProvider):
-                        models.append(
-                            GroqModel(
-                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                provider=PydanticGroqProvider(api_key=provider.api_key),
-                            )
+                        pyd_model = GroqModel(
+                            model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                            provider=PydanticGroqProvider(api_key=provider.api_key),
+                        )
+                    elif isinstance(provider, OpenRouterProvider):
+                        pyd_model = OpenAIModel(
+                            model_name=model_cfg.integration_aliases.openrouter or model_cfg.identity.id,
+                            provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
+                        )
+                    elif isinstance(provider, AzureProvider):
+                        pyd_model = OpenAIModel(
+                            model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                            provider=PydanticAzureProvider(api_key=provider.api_key, azure_endpoint=provider.base_url),
                         )
                     elif isinstance(
                         provider,
@@ -187,43 +179,33 @@ class NoLLMModel(Model):
                         | TogetherProvider
                         | GrokProvider,
                     ):
-                        models.append(
-                            OpenAIModel(
-                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
-                            )
-                        )
-                    elif isinstance(provider, OpenRouterProvider):
-                        models.append(
-                            OpenAIModel(
-                                model_name=model_cfg.integration_aliases.openrouter or model_cfg.identity.id,
-                                provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
-                            )
-                        )
-                    elif isinstance(provider, AzureProvider):
-                        models.append(
-                            OpenAIModel(
-                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
-                                provider=PydanticAzureProvider(
-                                    api_key=provider.api_key, azure_endpoint=provider.base_url
-                                ),
-                            )
+                        pyd_model = OpenAIModel(
+                            model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                            provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
                         )
                 except Exception as e:  # noqa: BLE001
                     logger.opt(exception=e).warning(f"Failed to create model for provider {type(provider).__name__}")
                     continue
+                if pyd_model is not None:
+                    models.append((pyd_model, model_cfg))
 
         if not models:
             msg = "Couldn't build any models for pydantic-ai integration"
             raise RuntimeError(msg)
+        return models
 
-        # Use FallbackModel if we have multiple models, otherwise use the single model
-        self._pydantic_model = FallbackModel(*models)
-        return self._pydantic_model
+    def _get_model_settings(
+        self,
+        model: ModelConfiguration,
+        user_settings: PydanticModelSettings | None = None,
+    ) -> PydanticModelSettings:
+        """Get merged model settings from no_llm config and user settings."""
+        base_settings = PydanticModelSettings(**model.parameters.get_model_parameters().get_parameters())
+        if user_settings is None:
+            return base_settings
 
-    def _get_model_settings(self, model: ModelConfiguration) -> PydanticModelSettings:
-        """Get the appropriate pydantic-ai model settings based on no_llm configuration."""
-        return PydanticModelSettings(**model.parameters.get_model_parameters().get_parameters())  # type: ignore
+        base_settings.update(user_settings)
+        return PydanticModelSettings(**base_settings)
 
     async def request(
         self,
@@ -231,11 +213,18 @@ class NoLLMModel(Model):
         model_settings: PydanticModelSettings | None,
         model_request_parameters: ModelRequestParameters,
     ) -> tuple[ModelResponse, usage.Usage]:
-        model_settings = self._get_model_settings(self.model_config)
-        if self._pydantic_model is None:
-            assert_never("Internal error: pydantic_model is None")  # type: ignore
+        last_error = None
+        for pyd_model, model in self.models:
+            try:
+                merged_settings = self._get_model_settings(model, model_settings)
+                return await pyd_model.request(messages, merged_settings, model_request_parameters)
+            except Exception as e:  # noqa: BLE001
+                last_error = e
+                logger.warning(f"Model {model.identity.id} failed, trying next fallback. Error: {e}")
+                continue
 
-        return await self._pydantic_model.request(messages, model_settings, model_request_parameters)
+        msg = f"All models failed. Last error: {last_error}"
+        raise RuntimeError(msg)
 
     @asynccontextmanager
     async def request_stream(
@@ -244,9 +233,17 @@ class NoLLMModel(Model):
         model_settings: PydanticModelSettings | None,
         model_request_parameters: ModelRequestParameters,
     ) -> AsyncIterator[StreamedResponse]:
-        if self._pydantic_model is None:
-            assert_never("Internal error: pydantic_model is None")  # type: ignore
+        last_error = None
+        for pyd_model, model in self.models:
+            try:
+                merged_settings = self._get_model_settings(model, model_settings)
+                async with pyd_model.request_stream(messages, merged_settings, model_request_parameters) as response:
+                    yield response
+                    return
+            except Exception as e:  # noqa: BLE001
+                last_error = e
+                logger.warning(f"Model {model.identity.id} failed, trying next fallback. Error: {e}")
+                continue
 
-        model_settings = self._get_model_settings(self.model_config)
-        async with self._pydantic_model.request_stream(messages, model_settings, model_request_parameters) as response:
-            yield response
+        msg = f"All models failed. Last error: {last_error}"
+        raise RuntimeError(msg)
