@@ -21,11 +21,11 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install hatch
-          uv pip install ruff mypy pytest pytest-cov
           uv sync --all-extras --all-packages
 
       - name: Format Check
-        run: ruff check . && ruff format --check .
+        run: |
+          hatch run fmt
         
       - name: Type Check
         run: hatch run types:check
