@@ -14,6 +14,9 @@
 
 `no/llm` is a Python library that provides a unified interface for working with LLMs, with built-in support for model configuration, parameter validation, and provider management.
 
+> **⚠️ Early Stage Development**  
+> This project is in early stages and under active development. While we're working hard to maintain stability, APIs and features may change as we improve the library. We encourage you to try it out and provide feedback, but please be aware that production use should be carefully considered.
+
 ## Quick Install
 
 ```bash
@@ -23,17 +26,24 @@ uv pip install "no_llm[pydantic-ai]"
 ## Quick Example with Pydantic AI
 
 ```python
+import os
+
 from no_llm.integrations.pydantic_ai import NoLLMModel
 from no_llm.registry import ModelRegistry
+from pydantic_ai import Agent
+
+os.environ["OPENROUTER_API_KEY"] = "..."
 
 # Get model from registry
 registry = ModelRegistry()
-model = registry.get_model("gpt-4o")
-no_llm_model = NoLLMModel(model)
+openrouter_models = list(registry.list_models(provider="openrouter"))
+print([m.identity.id for m in openrouter_models])
+# > ['claude-3.5-haiku', 'claude-3.5-sonnet-v2', 'claude-3.7-sonnet', 'deepseek-chat', 'deepseek-r1-llama-70b-distilled', 'deepseek-reasoner', ...]
+no_llm_model = NoLLMModel(*openrouter_models)
 
 # Use with Pydantic AI
 agent = Agent(no_llm_model)
-result = await agent.run("What is the capital of France?")
+result = agent.run_sync("What is the capital of France?")
 print(result.data)
 ```
 

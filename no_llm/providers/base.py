@@ -60,7 +60,7 @@ class Provider(BaseModel):
                     result[mapping.name] = value
             else:
                 result[param_name] = value
-        return result # type: ignore
+        return result  # type: ignore
 
     def reset_iterator(self) -> None:
         """Reset iteration state"""

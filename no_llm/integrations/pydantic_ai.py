@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, cast
 
+from typing_extensions import assert_never
+
 try:
     from anthropic import AsyncAnthropicVertex
     from mistralai_gcp import MistralGoogleCloud
@@ -65,9 +67,6 @@ if TYPE_CHECKING:
 ToolName = str
 
 
-NoLLMModelName = str | ModelConfiguration
-
-
 @dataclass
 class NoLLMModel(Model):
     """A model that uses no_llm under the hood.
@@ -79,139 +78,143 @@ class NoLLMModel(Model):
 
     def __init__(
         self,
-        model_name: NoLLMModelName,
+        default_model: ModelConfiguration,
+        *fallback_models: ModelConfiguration,
     ):
-        self.model = model_name
+        self.models = [default_model, *fallback_models]
         self._pydantic_model = None
+        self._get_pydantic_model()
 
     @property
     def model_name(self) -> str:
         """The model name."""
-        if isinstance(self.model, str):
-            return self.model
-        return self.model.identity.id
+        return "no_llm"
 
     @property
     def model_config(self) -> ModelConfiguration:
-        if isinstance(self.model, str):
-            msg = "Model name is not a model configuration"
-            raise TypeError(msg)
-        return self.model
+        return self.models[0]
 
     @property
     def system(self) -> str | None:  # type: ignore
         """The system / model provider, ex: openai."""
         return "no_llm"
 
-    def _get_pydantic_model(self, model: ModelConfiguration) -> Model:
+    def _get_pydantic_model(
+        self,
+    ) -> Model:
         """Get the appropriate pydantic-ai model based on no_llm configuration."""
         if self._pydantic_model is not None:
             return self._pydantic_model
 
-        if model.integration_aliases is None:
-            msg = "Model must have integration aliases. It is required for pydantic-ai integration."
-            raise TypeError(msg)
-        if model.integration_aliases.pydantic_ai is None:
-            msg = "Model must have a pydantic-ai integration alias. It is required for pydantic-ai integration."
-            raise TypeError(msg)
-
         models: list[Model] = []
 
-        # Try to build a model for each provider variant
-        for provider in model.iter():
-            try:
-                if isinstance(provider, VertexProvider):
-                    if "mistral" in model.identity.id:
-                        pydantic_mistral_gcp_patch()
-                        models.append(
-                            MistralModel(
-                                model_name=model.integration_aliases.pydantic_ai or model.identity.id,
-                                provider=PydanticMistralProvider(
-                                    mistral_client=MistralGoogleCloud(  # type: ignore
-                                        project_id=provider.project_id, region=provider.current
+        for model_cfg in self.models:
+            if model_cfg.integration_aliases is None:
+                msg = "Model must have integration aliases. It is required for pydantic-ai integration."
+                raise TypeError(msg)
+            if model_cfg.integration_aliases.pydantic_ai is None:
+                msg = "Model must have a pydantic-ai integration alias. It is required for pydantic-ai integration."
+                raise TypeError(msg)
+            if model_cfg.mode != ModelMode.CHAT:
+                msg = f"Model {model_cfg.identity.id} must be a chat model"
+                raise TypeError(msg)
+            # Try to build a model for each provider variant
+            for provider in model_cfg.iter():
+                try:
+                    if isinstance(provider, VertexProvider):
+                        if "mistral" in model_cfg.identity.id:
+                            pydantic_mistral_gcp_patch()
+                            models.append(
+                                MistralModel(
+                                    model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                    provider=PydanticMistralProvider(
+                                        mistral_client=MistralGoogleCloud(  # type: ignore
+                                            project_id=provider.project_id, region=provider.current
+                                        ),
                                     ),
-                                ),
+                                )
                             )
-                        )
-                    elif "claude" in model.identity.id:
+                        elif "claude" in model_cfg.identity.id:
+                            models.append(
+                                AnthropicModel(
+                                    model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                    provider=PydanticAnthropicProvider(
+                                        anthropic_client=AsyncAnthropicVertex(  # type: ignore
+                                            project_id=provider.project_id, region=provider.current
+                                        ),
+                                    ),
+                                )
+                            )
+                        elif "gemini" in model_cfg.identity.id:
+                            models.append(
+                                GeminiModel(
+                                    model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                    provider=PydanticVertexProvider(
+                                        region=cast(VertexAiRegion, provider.current),
+                                        project_id=provider.project_id,
+                                    ),
+                                )
+                            )
+                    elif isinstance(provider, AnthropicProvider):
                         models.append(
                             AnthropicModel(
-                                model_name=model.integration_aliases.pydantic_ai or model.identity.id,
+                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
                                 provider=PydanticAnthropicProvider(
-                                    anthropic_client=AsyncAnthropicVertex(  # type: ignore
-                                        project_id=provider.project_id, region=provider.current
-                                    ),
+                                    api_key=provider.api_key,
                                 ),
                             )
                         )
-                    elif "gemini" in model.identity.id:
+                    elif isinstance(provider, MistralProvider):
                         models.append(
-                            GeminiModel(
-                                model_name=model.integration_aliases.pydantic_ai or model.identity.id,
-                                provider=PydanticVertexProvider(
-                                    region=cast(VertexAiRegion, provider.current),
-                                    project_id=provider.project_id,
+                            MistralModel(
+                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                provider=PydanticMistralProvider(api_key=provider.api_key),
+                            )
+                        )
+                    elif isinstance(provider, GroqProvider):
+                        models.append(
+                            GroqModel(
+                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                provider=PydanticGroqProvider(api_key=provider.api_key),
+                            )
+                        )
+                    elif isinstance(
+                        provider,
+                        OpenAIProvider
+                        | DeepseekProvider
+                        | PerplexityProvider
+                        | FireworksProvider
+                        | TogetherProvider
+                        | GrokProvider,
+                    ):
+                        models.append(
+                            OpenAIModel(
+                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
+                            )
+                        )
+                    elif isinstance(provider, OpenRouterProvider):
+                        models.append(
+                            OpenAIModel(
+                                model_name=model_cfg.integration_aliases.openrouter or model_cfg.identity.id,
+                                provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
+                            )
+                        )
+                    elif isinstance(provider, AzureProvider):
+                        models.append(
+                            OpenAIModel(
+                                model_name=model_cfg.integration_aliases.pydantic_ai or model_cfg.identity.id,
+                                provider=PydanticAzureProvider(
+                                    api_key=provider.api_key, azure_endpoint=provider.base_url
                                 ),
                             )
                         )
-                elif isinstance(provider, AnthropicProvider):
-                    models.append(
-                        AnthropicModel(
-                            model_name=model.integration_aliases.pydantic_ai or model.identity.id,
-                            provider=PydanticAnthropicProvider(
-                                api_key=provider.api_key,
-                            ),
-                        )
-                    )
-                elif isinstance(provider, MistralProvider):
-                    models.append(
-                        MistralModel(
-                            model_name=model.integration_aliases.pydantic_ai or model.identity.id,
-                            provider=PydanticMistralProvider(api_key=provider.api_key),
-                        )
-                    )
-                elif isinstance(provider, GroqProvider):
-                    models.append(
-                        GroqModel(
-                            model_name=model.integration_aliases.pydantic_ai or model.identity.id,
-                            provider=PydanticGroqProvider(api_key=provider.api_key),
-                        )
-                    )
-                elif isinstance(
-                    provider,
-                    OpenAIProvider
-                    | DeepseekProvider
-                    | PerplexityProvider
-                    | FireworksProvider
-                    | TogetherProvider
-                    | GrokProvider,
-                ):
-                    models.append(
-                        OpenAIModel(
-                            model_name=model.integration_aliases.pydantic_ai or model.identity.id,
-                            provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
-                        )
-                    )
-                elif isinstance(provider, OpenRouterProvider):
-                    models.append(
-                        OpenAIModel(
-                            model_name=model.integration_aliases.openrouter or model.identity.id,
-                            provider=PydanticOpenAIProvider(api_key=provider.api_key, base_url=provider.base_url),
-                        )
-                    )
-                elif isinstance(provider, AzureProvider):
-                    models.append(
-                        OpenAIModel(
-                            model_name=model.integration_aliases.pydantic_ai or model.identity.id,
-                            provider=PydanticAzureProvider(api_key=provider.api_key, azure_endpoint=provider.base_url),
-                        )
-                    )
-            except Exception as e:  # noqa: BLE001
-                logger.opt(exception=e).warning(f"Failed to create model for provider {type(provider).__name__}")
-                continue
+                except Exception as e:  # noqa: BLE001
+                    logger.opt(exception=e).warning(f"Failed to create model for provider {type(provider).__name__}")
+                    continue
 
         if not models:
-            msg = "No models found for pydantic-ai integration"
+            msg = "Couldn't build any models for pydantic-ai integration"
             raise RuntimeError(msg)
 
         # Use FallbackModel if we have multiple models, otherwise use the single model
@@ -220,7 +223,7 @@ class NoLLMModel(Model):
 
     def _get_model_settings(self, model: ModelConfiguration) -> PydanticModelSettings:
         """Get the appropriate pydantic-ai model settings based on no_llm configuration."""
-        return PydanticModelSettings(**model.parameters.get_model_parameters().get_parameters()) # type: ignore
+        return PydanticModelSettings(**model.parameters.get_model_parameters().get_parameters())  # type: ignore
 
     async def request(
         self,
@@ -228,18 +231,11 @@ class NoLLMModel(Model):
         model_settings: PydanticModelSettings | None,
         model_request_parameters: ModelRequestParameters,
     ) -> tuple[ModelResponse, usage.Usage]:
-        model = self.model
-        if not isinstance(model, ModelConfiguration):
-            msg = "Model must be a model configuration"
-            raise TypeError(msg)
+        model_settings = self._get_model_settings(self.model_config)
+        if self._pydantic_model is None:
+            assert_never("Internal error: pydantic_model is None")  # type: ignore
 
-        if model.mode != ModelMode.CHAT:
-            msg = "Model does not support chat mode"
-            raise RuntimeError(msg)
-
-        model_settings = self._get_model_settings(model)
-        pydantic_model = self._get_pydantic_model(model)
-        return await pydantic_model.request(messages, model_settings, model_request_parameters)
+        return await self._pydantic_model.request(messages, model_settings, model_request_parameters)
 
     @asynccontextmanager
     async def request_stream(
@@ -248,16 +244,9 @@ class NoLLMModel(Model):
         model_settings: PydanticModelSettings | None,
         model_request_parameters: ModelRequestParameters,
     ) -> AsyncIterator[StreamedResponse]:
-        model = self.model
-        if not isinstance(model, ModelConfiguration):
-            msg = "Model must be a model configuration"
-            raise TypeError(msg)
+        if self._pydantic_model is None:
+            assert_never("Internal error: pydantic_model is None")  # type: ignore
 
-        if model.mode != ModelMode.CHAT:
-            msg = "Model does not support chat mode"
-            raise RuntimeError(msg)
-
-        model_settings = self._get_model_settings(model)
-        pydantic_model = self._get_pydantic_model(model)
-        async with pydantic_model.request_stream(messages, model_settings, model_request_parameters) as response:
+        model_settings = self._get_model_settings(self.model_config)
+        async with self._pydantic_model.request_stream(messages, model_settings, model_request_parameters) as response:
             yield response
