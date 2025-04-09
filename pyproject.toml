@@ -60,63 +60,13 @@ include = [
 [tool.ruff.lint]
 ignore = [
   "DTZ001", # use of tzinfo in datetime
-  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar` when using pydantic models
-  "TCH001", # Move application import `...` into a type-checking block - error when using pydantic models
-  "TCH003", # Move standard library import `collections.abc.Sequence` into a type-checking block - error when using pydantic models
+  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+  "TCH001", # Move application import into a type-checking block
+  "TCH003", # Move standard library import into a type-checking block
   "FBT001", # Boolean-typed positional argument in function definition
   "FBT002", # Boolean default positional argument in function definition
   "RET505", # Buggy
 ]
-
-# [tool.ruff.lint]
-# extend-select = [
-#     "Q",
-#     "RUF100",
-#     "C90",
-#     "UP",
-#     "I",
-#     "D",
-# ]
-# flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
-# isort = { combine-as-imports = true, known-first-party = ["pydantic_ai"] }
-# mccabe = { max-complexity = 15 }
-# ignore = [
-#     "D100", # ignore missing docstring in module
-#     "D102", # ignore missing docstring in public method
-#     "D104", # ignore missing docstring in public package
-#     "D105", # ignore missing docstring in magic methods
-#     "D107", # ignore missing docstring in __init__ methods
-# ]
-
-# [tool.ruff.lint.pydocstyle]
-# convention = "google"
-
-# [tool.ruff.format]
-# # don't format python in docstrings, pytest-examples takes care of it
-# docstring-code-format = false
-# quote-style = "single"
-
-# [tool.ruff.lint.per-file-ignores]
-# "tests/**/*.py" = ["D"]
-# "docs/**/*.py" = ["D"]
-# "examples/**/*.py" = ["D101", "D103"]
-
-
-# [tool.pyright]
-# typeCheckingMode = "strict"
-# reportMissingTypeStubs = false
-# reportUnnecessaryIsInstance = false
-# reportUnnecessaryTypeIgnoreComment = true
-# include = ["no_llm", "tests", "examples"]
-# venvPath = ".venv"
-# # see https://github.com/microsoft/pyright/issues/7771 - we don't want to error on decorated functions in tests
-# # which are not otherwise used
-# executionEnvironments = [
-#   { root = "tests", reportUnusedFunction = false },
-# ]
-
-# [tool.mypy]
-# strict = true
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:no_llm}"

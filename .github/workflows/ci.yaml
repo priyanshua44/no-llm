@@ -9,7 +9,7 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,14 +19,13 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync --all-extras --all-packages
-          
-      - name: Install Hatch
-        run: uv pip install hatch
+        run: |
+          uv pip install hatch
+          uv pip install ruff mypy pytest pytest-cov
+          uv sync --all-extras --all-packages
 
       - name: Format Check
-        run: |
-          hatch run fmt
+        run: ruff check . && ruff format --check .
         
       - name: Type Check
         run: hatch run types:check
@@ -62,7 +61,7 @@ jobs:
           publish_dir: ./site
 
   publish:
-    needs: [lint, docs]
+    needs: [test, docs]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
