@@ -14,6 +14,9 @@
 
 `no/llm` is a Python library that provides a unified interface for working with LLMs, with built-in support for model configuration, parameter validation, and provider management.
 
+> **⚠️ Early Stage Development**  
+> This project is in early stages and under active development. While we're working hard to maintain stability, APIs and features may change as we improve the library. We encourage you to try it out and provide feedback, but please be aware that production use should be carefully considered.
+
 ## Quick Install
 
 ```bash
@@ -23,18 +26,40 @@ uv pip install "no_llm[pydantic-ai]"
 ## Quick Example with Pydantic AI
 
 ```python
+import os
+
 from no_llm.integrations.pydantic_ai import NoLLMModel
 from no_llm.registry import ModelRegistry
+from no_llm.settings import ValidationMode, settings
+from pydantic_ai import Agent
+from pydantic_ai.settings import ModelSettings
+
+settings.validation_mode = ValidationMode.ERROR
+# or ValidationMode.WARN, ValidationMode.CLAMP
+
+os.environ["OPENROUTER_API_KEY"] = "..."
 
 # Get model from registry
 registry = ModelRegistry()
-model = registry.get_model("gpt-4o")
-no_llm_model = NoLLMModel(model)
+openrouter_models = list(registry.list_models(provider="openrouter"))
+print([m.identity.id for m in openrouter_models])
+# > ['claude-3.5-haiku', 'claude-3.5-sonnet-v2', 'claude-3.7-sonnet', 'deepseek-chat', 'deepseek-r1-llama-70b-distilled', 'deepseek-reasoner', ...]
+no_llm_model = NoLLMModel(*openrouter_models)
 
 # Use with Pydantic AI
-agent = Agent(no_llm_model)
-result = await agent.run("What is the capital of France?")
+agent = Agent(no_llm_model, model_settings=ModelSettings(temperature=1.2))
+result = agent.run_sync("What is the capital of France?")
 print(result.data)
+# > 2025-04-09 09:50:51.375 | WARNING  | no_llm.integrations.pydantic_ai:request:220 - Model deepseek-chat failed, trying next fallback. Error: Invalid value for parameter 'temperature'
+# > Current value: 1.2
+# > Valid range: (0.0, 1.0)
+# > Error: Value 1.2 outside range [0.0, 1.0]
+# > 2025-04-09 09:50:51.375 | WARNING  | no_llm.integrations.pydantic_ai:request:220 - Model deepseek-r1-llama-70b-distilled failed, trying next fallback. Error: Invalid value for parameter 'temperature'
+# > Current value: 1.2
+# > Valid range: (0.0, 1.0)
+# > Error: Value 1.2 outside range [0.0, 1.0]
+# ✅ gemini-2.0-flash
+# > The capital of France is **Paris**.
 ```
 
 ## Why no/llm?
