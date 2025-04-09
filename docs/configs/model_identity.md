@@ -1,6 +1,6 @@
 # Model Identity
 
-Model identity provides essential identification and descriptive information for each model in stdllm.
+Model identity provides essential identification and descriptive information for each model in no_llm.
 
 ## Identity Fields
 
@@ -16,7 +16,7 @@ Model identity provides essential identification and descriptive information for
 ## Usage Example
 
 ```python
-from stdllm.config.model import ModelIdentity
+from no_llm.config.model import ModelIdentity
 
 identity = ModelIdentity(
     id="gpt-4-turbo",
@@ -29,7 +29,7 @@ identity = ModelIdentity(
 ```
 
 !!! note "Model ID vs API Name"
-    The `id` field is stdllm's internal identifier, while `model_api_name` is used when the provider's API requires a different name. If `model_api_name` is not set, the `id` is used for API calls.
+    The `id` field is no_llm's internal identifier, while `model_api_name` is used when the provider's API requires a different name. If `model_api_name` is not set, the `id` is used for API calls.
 
 !!! tip "Versioning"
     Use semantic versioning in the `version` field to track model updates and ensure compatibility:

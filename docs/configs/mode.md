@@ -1,9 +1,9 @@
 # Model Modes
 
-Model modes define the primary function of a model in stdllm. Each mode represents a specific type of task the model is designed to perform.
+Model modes define the primary function of a model in no_llm. Each mode represents a specific type of task the model is designed to perform.
 
 !!! warning "Limited Mode Support"
-    Currently, stdllm primarily supports `CHAT` mode and chat-based models. Support for other modes (completion, embedding, image generation, audio) is under development and will be available in future releases.
+    Currently, no_llm primarily supports `CHAT` mode and chat-based models. Support for other modes (completion, embedding, image generation, audio) is under development and will be available in future releases.
 
 ## Available Modes
 
@@ -21,8 +21,8 @@ Model modes define the primary function of a model in stdllm. Each mode represen
 You can list all models supporting a specific mode using the registry:
 
 ```python
-from stdllm.config.enums import ModelMode
-from stdllm.registry import ModelRegistry
+from no_llm.config.enums import ModelMode
+from no_llm.registry import ModelRegistry
 
 registry = ModelRegistry()
 

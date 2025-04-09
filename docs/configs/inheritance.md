@@ -1,13 +1,13 @@
 # Configuration Inheritance
 
-stdllm supports inheritance for model configurations, allowing you to create custom model configurations with specialized parameters and behaviors.
+no_llm supports inheritance for model configurations, allowing you to create custom model configurations with specialized parameters and behaviors.
 
 ## Creating Custom Configurations
 
 To create a custom model configuration, inherit from `ModelConfiguration` and optionally define custom parameters:
 
 ```python
-from stdllm.config import (
+from no_llm.config import (
     ModelConfiguration,
     ConfigurableModelParameters,
     ModelIdentity,

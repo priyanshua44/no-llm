@@ -38,8 +38,8 @@ By checking capabilities before making requests, you can:
 You can list models that match specific capability requirements using the registry:
 
 ```python
-from stdllm.config.enums import ModelCapability
-from stdllm.registry import ModelRegistry, SetFilter
+from no_llm.config.enums import ModelCapability
+from no_llm.registry import ModelRegistry, SetFilter
 
 registry = ModelRegistry()
 
@@ -62,8 +62,8 @@ advanced_models = list(registry.list_models(
 Parameters are validated against model capabilities:
 
 ```python
-from stdllm.config.model import ModelConfiguration
-from stdllm.config.enums import ModelCapability
+from no_llm.config.model import ModelConfiguration
+from no_llm.config.enums import ModelCapability
 
 model_config = registry.get_model("gpt-4")
 
