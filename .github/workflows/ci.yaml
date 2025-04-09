@@ -67,6 +67,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      pages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
