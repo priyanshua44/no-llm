@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     tags:
-      - 'v*'  # Push events to matching v*, i.e. v1.0, v20.15.10
+      - '*'  # Push events to matching v*, i.e. v1.0, v20.15.10
   pull_request:
     branches: [ main ]
 
@@ -14,23 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
         with:
-          enable-cache: true
-
-      - name: Create and activate venv
-        run: |
-          uv venv
-          . .venv/bin/activate
+          python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
-          uv pip install hatch
-          uv sync --all-extras --all-packages
+          python -m pip install --upgrade pip
+          pip install hatch
 
       - name: Format Check
-        run: |
-          hatch run fmt
+        run: hatch run fmt
         
       - name: Type Check
         run: hatch run types:check
@@ -45,19 +40,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
         with:
-          enable-cache: true
-
-      - name: Create and activate venv
-        run: |
-          uv venv
-          . .venv/bin/activate
+          python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
-          uv pip install hatch
-          uv sync --all-extras --all-packages
+          python -m pip install --upgrade pip
+          pip install hatch
 
       - name: Build docs
         run: hatch run docs:mkdocs build
@@ -79,20 +70,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
         with:
-          enable-cache: true
-
-      - name: Create and activate venv
-        run: |
-          uv venv
-          . .venv/bin/activate
+          python-version: '3.11'
+          cache: 'pip'
 
       - name: Install build dependencies
-        run: uv pip install build hatch
+        run: |
+          python -m pip install --upgrade pip
+          pip install build hatch
 
       - name: Build package
-        run: uv build --all-packages
+        run: python -m build
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
