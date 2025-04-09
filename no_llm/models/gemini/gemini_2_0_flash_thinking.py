@@ -1,0 +1,108 @@
+from __future__ import annotations
+
+from collections.abc import Sequence
+from datetime import datetime
+
+from pydantic import Field
+
+from no_llm.config import (
+    ConfigurableModelParameters,
+    IntegrationAliases,
+    ModelCapability,
+    ModelConfiguration,
+    ModelConstraints,
+    ModelIdentity,
+    ModelMetadata,
+    ModelMode,
+    ModelPricing,
+    ModelProperties,
+    ParameterValue,
+    ParameterVariant,
+    QualityProperties,
+    SpeedProperties,
+    TokenPrices,
+)
+from no_llm.config.parameters import NOT_GIVEN, NotGiven
+from no_llm.providers import OpenRouterProvider, Provider, VertexProvider
+
+
+class Gemini20FlashThinkingConfiguration(ModelConfiguration):
+    """Configuration for Gemini 2.0 Flash Thinking model"""
+
+    identity: ModelIdentity = ModelIdentity(
+        id="gemini-2.0-flash-thinking",
+        name="Gemini 2.0 Flash Thinking",
+        version="2024.02",
+        description="Gemini 2.0 Flash Thinking is a smaller and faster version of Google's best foundation model, performing with respectable quality at a variety of multimodal tasks such as visual understanding, classification, summarization, and creating content from image, audio and video.",
+        creator="Google",
+    )
+
+    providers: Sequence[Provider] = [VertexProvider(), OpenRouterProvider()]
+
+    mode: ModelMode = ModelMode.CHAT
+
+    capabilities: set[ModelCapability] = {
+        ModelCapability.STREAMING,
+        ModelCapability.SYSTEM_PROMPT,
+    }
+
+    constraints: ModelConstraints = ModelConstraints(
+        context_window=128000, max_input_tokens=128000, max_output_tokens=8192
+    )
+
+    properties: ModelProperties | None = ModelProperties(
+        speed=SpeedProperties(score=169.0, label="High", description="Average (1-3 seconds)"),
+        quality=QualityProperties(score=85.0, label="High", description="High Quality"),
+    )
+
+    metadata: ModelMetadata = ModelMetadata(
+        privacy_level=[],
+        pricing=ModelPricing(token_prices=TokenPrices(input_price_per_1k=0.0004, output_price_per_1k=0.0008)),
+        release_date=datetime(2024, 12, 1),
+        data_cutoff_date=datetime(2024, 12, 1),
+    )
+
+    integration_aliases: IntegrationAliases | None = IntegrationAliases(
+        pydantic_ai="gemini-2.0-flash-thinking-exp-01-21",
+        litellm="vertex_ai/gemini-2.0-flash-thinking-exp-01-21",
+        langfuse="gemini-2.0-flash-thinking-exp-01-21",
+        lmarena="gemini-2.0-flash-thinking-exp-01-21",
+        openrouter="google/gemini-2.0-flash-thinking-exp:free",
+    )
+
+    class Parameters(ConfigurableModelParameters):
+        model_config = ConfigurableModelParameters.model_config
+        temperature: ParameterValue[float | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[float | NotGiven](variant=ParameterVariant.FIXED, value=0.8)
+        )
+        top_p: ParameterValue[float | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[float | NotGiven](variant=ParameterVariant.FIXED, value=0.8)
+        )
+        top_k: ParameterValue[int | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[int | NotGiven](variant=ParameterVariant.FIXED, value=20)
+        )
+        frequency_penalty: ParameterValue[float | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[float | NotGiven](
+                variant=ParameterVariant.UNSUPPORTED, value=NOT_GIVEN
+            )
+        )
+        presence_penalty: ParameterValue[float | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[float | NotGiven](
+                variant=ParameterVariant.UNSUPPORTED, value=NOT_GIVEN
+            )
+        )
+        max_tokens: ParameterValue[int | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[int | NotGiven](variant=ParameterVariant.FIXED, value=8192)
+        )
+        stop: ParameterValue[list[str] | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[list[str] | NotGiven](
+                variant=ParameterVariant.VARIABLE, value=NOT_GIVEN
+            )
+        )
+        seed: ParameterValue[int | NotGiven] = Field(
+            default_factory=lambda: ParameterValue[int | NotGiven](
+                variant=ParameterVariant.UNSUPPORTED, value=NOT_GIVEN
+            )
+        )
+
+    parameters: ConfigurableModelParameters = Field(default_factory=Parameters)

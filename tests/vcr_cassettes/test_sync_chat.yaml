@@ -1,0 +1,101 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"user","content":"What is the capital of Italy??"}],"model":"gpt-4o","frequency_penalty":0.0,"max_completion_tokens":4096,"n":1,"presence_penalty":0.0,"stream":false,"temperature":0.0,"top_p":1.0}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '217'
+      content-type:
+      - application/json
+      cookie:
+      - __cf_bm=70hiSHjxoTXtetkpZxPvNrB4LbJKmKP5w8yH2ErYqWU-1744153112-1.0.1.1-003W8xSPU1iIyps8Rpp7yGVHRURzb1sprGbm1cNzxsBLGxJssgL2ksRPYz9G2u2LlZWPX9_swBtNnIESsvM0C5ZfqDM8dTaOWzEnYkJeAyY;
+        _cfuvid=GARLEOzifpko6ODnGXE3wG1B.fyv0qFlwfb15cTOe5c-1744153112132-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 1.69.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 1.69.0
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '1'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.7
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: !!binary |
+        YwDoGQBArNRlr6baudp+AnUBQpnOQNLAJ+x/zO36Qo2a9tPEQrNQ9M3kukEXjRyVxgiVUEkZdOqe
+        /SZGWoBq/Dac3/0VAFUZSVBaxj7tTBtun+xst6PkfGuef9/vz+/4J3veiR/9XVYf71AgANJJzaln
+        0mCKgV3pHiKsXL7GGUmMl7PZeD4dj6fGDzqdcUsSVBgfznQ4GU1m4WgVjhbk1VJXKTuSeBEA8Hs2
+        Amj7+z5JjIKrwmQMjSTwRwBZ3TJJUOxc5XzcewoA0L3ulgTdloz19v8AnePIx+03Kodr3fGAB7vV
+        vx+3JNFv2tYh3Cs2Y+ktFP3HfIxaXRirE0cnav/WUJ/aGiQJcl4bytT5F8CbFu1NeU/JWN0Zr7xu
+        OKQ8npXWIPEBIK0G/CoBMC1NJoFDUo3qmk7KW5TGackZG3TfjTdZpY3sGPSfT65/rvStq744wJhI
+        UzaeM9XqMF0z+DjNcs0plITMzL/Yny+ufMWWJOiNwgHefTvPncqrvmBrbPXkvM6NWq1XcTpZL8dr
+        Ev/CAAM=
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 92d55ebb7f163a95-LIS
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - br
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 08 Apr 2025 22:58:33 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - spot-technologies
+      openai-processing-ms:
+      - '290'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '50000'
+      x-ratelimit-limit-tokens:
+      - '150000000'
+      x-ratelimit-remaining-requests:
+      - '49999'
+      x-ratelimit-remaining-tokens:
+      - '149999989'
+      x-ratelimit-reset-requests:
+      - 1ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_70f55027a951beed1df4ef5f41de6b11
+    status:
+      code: 200
+      message: OK
+version: 1

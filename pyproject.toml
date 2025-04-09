@@ -1,0 +1,180 @@
+[build-system]
+requires = ["hatchling>=1.18.0", "packaging>=23.2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "no_llm"
+version = "0.0.1"
+description = 'Standard Interface for Large Language Models'
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = []
+authors = [
+  { name = "pedro", email = "pedro@noxus.ai" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.0.0",
+    "PyYAML>=6.0.0",
+    "loguru>=0.7.0"
+]
+
+[project.optional-dependencies]
+langchain = [
+    "langchain>=0.3.23",
+    "langchain-core>=0.3.51"
+]
+
+pydantic-ai = [
+    "pydantic-ai>=0.0.53"
+]
+
+[project.urls]
+Documentation = "https://github.com/Noxus-AI/no-llm#readme"
+Issues = "https://github.com/Noxus-AI/no-llm/issues"
+Source = "https://github.com/Noxus-AI/no-llm"
+
+
+# ========================
+# DEV
+# ========================
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+include = [
+    "no_llm/**/*.py",
+]
+
+[tool.ruff.lint]
+ignore = [
+  "DTZ001", # use of tzinfo in datetime
+  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar` when using pydantic models
+  "TCH001", # Move application import `...` into a type-checking block - error when using pydantic models
+  "TCH003", # Move standard library import `collections.abc.Sequence` into a type-checking block - error when using pydantic models
+  "FBT001", # Boolean-typed positional argument in function definition
+  "FBT002", # Boolean default positional argument in function definition
+  "RET505", # Buggy
+]
+
+# [tool.ruff.lint]
+# extend-select = [
+#     "Q",
+#     "RUF100",
+#     "C90",
+#     "UP",
+#     "I",
+#     "D",
+# ]
+# flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+# isort = { combine-as-imports = true, known-first-party = ["pydantic_ai"] }
+# mccabe = { max-complexity = 15 }
+# ignore = [
+#     "D100", # ignore missing docstring in module
+#     "D102", # ignore missing docstring in public method
+#     "D104", # ignore missing docstring in public package
+#     "D105", # ignore missing docstring in magic methods
+#     "D107", # ignore missing docstring in __init__ methods
+# ]
+
+# [tool.ruff.lint.pydocstyle]
+# convention = "google"
+
+# [tool.ruff.format]
+# # don't format python in docstrings, pytest-examples takes care of it
+# docstring-code-format = false
+# quote-style = "single"
+
+# [tool.ruff.lint.per-file-ignores]
+# "tests/**/*.py" = ["D"]
+# "docs/**/*.py" = ["D"]
+# "examples/**/*.py" = ["D101", "D103"]
+
+
+# [tool.pyright]
+# typeCheckingMode = "strict"
+# reportMissingTypeStubs = false
+# reportUnnecessaryIsInstance = false
+# reportUnnecessaryTypeIgnoreComment = true
+# include = ["no_llm", "tests", "examples"]
+# venvPath = ".venv"
+# # see https://github.com/microsoft/pyright/issues/7771 - we don't want to error on decorated functions in tests
+# # which are not otherwise used
+# executionEnvironments = [
+#   { root = "tests", reportUnusedFunction = false },
+# ]
+
+# [tool.mypy]
+# strict = true
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:no_llm}"
+
+# =========================
+# TEST
+# =========================
+[tool.coverage.run]
+source_pkgs = ["no_llm"]
+branch = true
+parallel = true
+
+[tool.coverage.paths]
+no_llm = ["no_llm", "*/no_llm/no_llm"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+fail_under = 90
+
+[tool.pytest.ini_options]
+addopts = "-ra -q --doctest-modules --doctest-glob='*.md'"
+testpaths = [
+    "tests",
+    "examples",
+]
+python_files = [
+    "*.py",
+]
+
+[tool.hatch.envs.docs]
+dependencies = [
+    "mkdocs",
+    "mkdocs-material[imaging]",
+    "mkdocstrings[python]",
+    "mkdocs-glightbox"
+]
+[tool.hatch.envs.docs.scripts]
+serve = "mkdocs serve"
+build = "mkdocs build"
+
+[tool.hatch.envs.test]
+dependencies = [
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "pytest-asyncio>=0.21.0",
+  "anyio>=4.9.0",
+  "vcrpy>=4.3.1",
+  "pydantic-ai>=0.0.53",
+  "openai>=1.0.0",
+  "langchain>=0.3.23",
+  "pytest-vcr>=1.0.2",
+  "brotli>=1.1.0",
+]
+
+[tool.hatch.envs.test.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov=no_llm --cov-report=term-missing {args:tests}"
