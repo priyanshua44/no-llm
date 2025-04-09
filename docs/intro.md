@@ -23,13 +23,13 @@ uv pip install "no_llm[pydantic-ai]"
 ## Quick Example with Pydantic AI
 
 ```python
-from no_llm.integrations.pydantic_ai import no_llmModel
+from no_llm.integrations.pydantic_ai import NoLLMModel
 from no_llm.registry import ModelRegistry
 
 # Get model from registry
 registry = ModelRegistry()
 model = registry.get_model("gpt-4o")
-no_llm_model = no_llmModel(model)
+no_llm_model = NoLLMModel(model)
 
 # Use with Pydantic AI
 agent = Agent(no_llm_model)
@@ -37,7 +37,7 @@ result = await agent.run("What is the capital of France?")
 print(result.data)
 ```
 
-## Why no_llm?
+## Why no/llm?
 
 * __Provider Agnostic__: Support for OpenAI, Anthropic, Google, Mistral, Groq, and more through a single interface
 
