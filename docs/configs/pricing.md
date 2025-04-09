@@ -1,6 +1,6 @@
 # Model Pricing
 
-stdllm supports both token-based and character-based pricing models for LLM usage calculations.
+no_llm supports both token-based and character-based pricing models for LLM usage calculations.
 
 ## Pricing Models
 
@@ -9,7 +9,7 @@ stdllm supports both token-based and character-based pricing models for LLM usag
 Token-based pricing is the most common model, where costs are calculated per thousand tokens:
 
 ```python
-from stdllm.config.metadata import TokenPrices
+from no_llm.config.metadata import TokenPrices
 
 pricing = TokenPrices(
     input_price_per_1k=0.01,  # $0.01 per 1000 input tokens
@@ -22,7 +22,7 @@ pricing = TokenPrices(
 Some models use character-based pricing instead:
 
 ```python
-from stdllm.config.metadata import CharacterPrices
+from no_llm.config.metadata import CharacterPrices
 
 pricing = CharacterPrices(
     input_price_per_1k=0.001,  # $0.001 per 1000 input characters

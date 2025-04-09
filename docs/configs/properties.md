@@ -10,7 +10,7 @@ Model properties provide informational metrics about model performance and quali
 Speed properties indicate the model's processing performance:
 
 ```python
-from stdllm.config.properties import SpeedProperties
+from no_llm.config.properties import SpeedProperties
 
 speed = SpeedProperties(
     score=1000.0,        # Tokens per second
@@ -24,7 +24,7 @@ speed = SpeedProperties(
 Quality properties reflect the model's output quality on a standardized scale:
 
 ```python
-from stdllm.config.properties import QualityProperties
+from no_llm.config.properties import QualityProperties
 
 quality = QualityProperties(
     score=95.0,          # Score from 0-100
@@ -36,7 +36,7 @@ quality = QualityProperties(
 !!! tip "Custom Properties"
     You can extend the properties system by inheriting from the base Pydantic models:
     ```python
-    from stdllm.config.properties import ModelProperties
+    from no_llm.config.properties import ModelProperties
     from pydantic import BaseModel, Field
 
     class CustomMetrics(BaseModel):

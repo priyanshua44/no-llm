@@ -15,7 +15,7 @@ All constraints must be positive integers (>0).
 ## Usage Example
 
 ```python
-from stdllm.config.model import ModelConstraints
+from no_llm.config.model import ModelConstraints
 
 constraints = ModelConstraints(
     context_window=8192,      # 8K context window

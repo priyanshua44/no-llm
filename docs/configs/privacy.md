@@ -1,6 +1,6 @@
 # Model Privacy
 
-stdllm supports various privacy levels for models, allowing you to choose the appropriate level of data protection for your use case.
+no_llm supports various privacy levels for models, allowing you to choose the appropriate level of data protection for your use case.
 
 ## Privacy Levels
 
@@ -17,8 +17,8 @@ stdllm supports various privacy levels for models, allowing you to choose the ap
 You can list models that match specific privacy requirements using the registry:
 
 ```python
-from stdllm.config.metadata import PrivacyLevel
-from stdllm.registry import ModelRegistry, SetFilter
+from no_llm.config.metadata import PrivacyLevel
+from no_llm.registry import ModelRegistry, SetFilter
 
 registry = ModelRegistry()
 

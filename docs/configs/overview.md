@@ -1,6 +1,6 @@
 # Configuration Overview
 
-The stdllm configuration system provides a comprehensive way to define and manage model configurations. This overview will help you understand how the different components work together.
+The no_llm configuration system provides a comprehensive way to define and manage model configurations. This overview will help you understand how the different components work together.
 
 ## Core Components
 
@@ -16,7 +16,7 @@ The configuration system consists of several key components:
 
 ## Built-in Models
 
-stdllm includes configurations for popular models:
+no_llm includes configurations for popular models:
 
 ### Anthropic Models
 - Claude 3 (Opus, Sonnet, Haiku)
@@ -43,8 +43,8 @@ stdllm includes configurations for popular models:
 ## Model Configuration API
 
 ```python
-from stdllm.config.model import ModelConfiguration
-from stdllm.config.enums import ModelMode, ModelCapability
+from no_llm.config.model import ModelConfiguration
+from no_llm.config.enums import ModelMode, ModelCapability
 
 model = ModelConfiguration(
     identity=ModelIdentity(id="gpt-4", name="GPT-4", version="1.0.0"),
