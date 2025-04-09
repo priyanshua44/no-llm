@@ -4,7 +4,6 @@
 </div>
 
 <div align="center">
-  <a href="https://github.com/Noxus-AI/no-llm/actions/workflows/ci.yml"><img src="https://github.com/Noxus-AI/no-llm/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://pypi.python.org/pypi/no_llm"><img src="https://img.shields.io/pypi/v/no_llm.svg" alt="PyPI"></a>
   <a href="https://github.com/Noxus-AI/no-llm"><img src="https://img.shields.io/pypi/pyversions/no_llm.svg" alt="versions"></a>
   <a href="https://github.com/Noxus-AI/no-llm/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Noxus-AI/no-llm.svg" alt="license"></a>
@@ -25,8 +24,10 @@ uv pip install "no_llm[pydantic-ai]"
 
 ## Quick Example with Pydantic AI
 
-!!! tip "Free Testing"
-    Get a free API key from [OpenRouter](https://openrouter.ai/keys) to test various models without individual provider accounts.
+
+> [!TIP]
+> Get a free API key from [OpenRouter](https://openrouter.ai/keys) to test various models without individual provider accounts.
+
 
 ```python
 import os
