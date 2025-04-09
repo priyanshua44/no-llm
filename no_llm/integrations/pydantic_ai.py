@@ -200,12 +200,9 @@ class NoLLMModel(Model):
         user_settings: PydanticModelSettings | None = None,
     ) -> PydanticModelSettings:
         """Get merged model settings from no_llm config and user settings."""
-        base_settings = PydanticModelSettings(**model.parameters.get_model_parameters().get_parameters())
-        if user_settings is None:
-            return base_settings
-
-        base_settings.update(user_settings)
-        return PydanticModelSettings(**base_settings)
+        if user_settings is not None:
+            model.parameters.set_parameters(**user_settings)
+        return PydanticModelSettings(**model.parameters.get_model_parameters().get_parameters())
 
     async def request(
         self,

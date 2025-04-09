@@ -72,7 +72,7 @@ class Gemini20FlashLiteConfiguration(ModelConfiguration):
         litellm="vertex_ai/gemini-2.0-flash-lite",
         langfuse="gemini-2.0-flash-lite",
         lmarena="gemini-2.0-flash-lite-001",
-        openrouter="google/gemini-2.0-flash-lite:free",
+        openrouter="google/gemini-2.0-flash-lite-001",
     )
 
     class Parameters(ConfigurableModelParameters):

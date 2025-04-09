@@ -80,7 +80,7 @@ class Claude3HaikuConfiguration(ModelConfiguration):
             default_factory=lambda: ParameterValue[float | NotGiven](
                 variant=ParameterVariant.VARIABLE,
                 value=0.0,
-                validation_rule=RangeValidation(min_value=0.0, max_value=2.0),
+                validation_rule=RangeValidation(min_value=0.0, max_value=1.0),
             )
         )
         top_p: ParameterValue[float | NotGiven] = Field(

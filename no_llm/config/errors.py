@@ -47,14 +47,29 @@ class InvalidRangeError(ParameterError):
         self.value = value
         self.reason = reason
         self.valid_range = valid_range
+        self._param_name = param_name
 
-        message = [f"Invalid value for parameter '{param_name}'"]
-        message.append(f"Current value: {value}")
-        if valid_range:
-            message.append(f"Valid range: {valid_range}")
-        message.append(f"Error: {reason}")
+        # Create initial message and call parent's __init__
+        self._update_message()
 
-        super().__init__(param_name, "\n".join(message))
+    @property
+    def param_name(self) -> str:
+        return self._param_name
+
+    @param_name.setter
+    def param_name(self, value: str):
+        self._param_name = value
+        self._update_message()
+
+    def _update_message(self):
+        message = [f"Invalid value for parameter '{self._param_name}'"]
+        message.append(f"Current value: {self.value}")
+        if self.valid_range:
+            message.append(f"Valid range: {self.valid_range}")
+        message.append(f"Error: {self.reason}")
+
+        # Directly update the Exception args to avoid recursion
+        Exception.__init__(self, "\n".join(message))
 
 
 class InvalidEnumError(ParameterError):
@@ -62,14 +77,29 @@ class InvalidEnumError(ParameterError):
         self.value = value
         self.reason = reason
         self.valid_values = valid_values
+        self._param_name = param_name
 
-        message = [f"Invalid value for parameter '{param_name}'"]
-        message.append(f"Current value: {value}")
-        if valid_values:
-            message.append(f"Valid values: {valid_values}")
-        message.append(f"Error: {reason}")
+        # Create initial message and call parent's __init__
+        self._update_message()
 
-        super().__init__(param_name, "\n".join(message))
+    @property
+    def param_name(self) -> str:
+        return self._param_name
+
+    @param_name.setter
+    def param_name(self, value: str):
+        self._param_name = value
+        self._update_message()
+
+    def _update_message(self):
+        message = [f"Invalid value for parameter '{self._param_name}'"]
+        message.append(f"Current value: {self.value}")
+        if self.valid_values:
+            message.append(f"Valid values: {self.valid_values}")
+        message.append(f"Error: {self.reason}")
+
+        # Directly update the Exception args to avoid recursion
+        Exception.__init__(self, "\n".join(message))
 
 
 class MissingCapabilitiesError(Exception):
