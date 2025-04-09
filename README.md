@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>no_llm</h1>
+  <h1>no/llm</h1>
   <em>Standard Interface for Large Language Models</em>
 </div>
 
