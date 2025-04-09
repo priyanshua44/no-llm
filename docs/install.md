@@ -22,7 +22,7 @@ uv pip install "no_llm[pydantic-ai]"
 For development, clone the repository and install in editable mode:
 
 ```bash
-git clone https://github.com/pedro/no_llm
-cd no_llm
+git clone https://github.com/Noxus-AI/no-llm
+cd no-llm
 uv pip install -e ".[pydantic-ai]"
 ```
