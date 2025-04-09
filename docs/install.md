@@ -2,7 +2,7 @@
 
 ## Basic Installation
 
-Install no_llm using pip:
+Install no_llm using uv:
 
 ```bash
 uv pip install no_llm
