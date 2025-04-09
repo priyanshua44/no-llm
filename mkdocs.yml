@@ -1,7 +1,7 @@
 site_name: no/llm
 site_description: Standard Interface for Large Language Models
 strict: true
-site_url: https://ai.noxus.ai
+site_url: https://noxus-ai.github.io/no-llm
 
 repo_name: Noxus-AI/no-llm
 repo_url: https://github.com/Noxus-AI/no-llm
@@ -10,7 +10,7 @@ edit_uri: edit/main/docs/
 copyright: © Noxus 2025 to present
 
 nav:
-  - Introduction: intro.md
+  - Introduction: index.md
   - Installation: install.md
   - Configuration:
     - Overview: configs/overview.md

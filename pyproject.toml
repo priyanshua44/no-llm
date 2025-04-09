@@ -117,7 +117,7 @@ dependencies = [
     "mkdocs-glightbox"
 ]
 [tool.hatch.envs.docs.scripts]
-serve = "mkdocs serve"
+serve = "mkdocs serve -a localhost:3111"
 build = "mkdocs build"
 deploy = "mkdocs gh-deploy --config-file mkdocs.yml --force"
 
